@@ -24,7 +24,8 @@ EOF
 
 echo "Back to Bash" # this is a bash line
 
-They will be able to write Python code without worrying about adding ‘here-doc’ redirection syntax as shown above [ <<EOF.....EOF ].
+They will be able to write Python code without worrying about adding ‘here-doc’ redirection syntax as shown above 
+[ <<EOF.....EOF ]
 
 To test the project, follow these steps:
 ----------------------------------------
