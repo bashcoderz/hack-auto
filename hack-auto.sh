@@ -4,7 +4,7 @@ clear
 echo -e -n "\n\tInitializing ....."
 sleep 1
 clear
-echo -e "\n\n\t\t\tHACKAUTO  v1.2\n\n"
+echo -e "\n\n\t\t\tHACKAUTO  v1.4\n\n"
 echo -e -n "\nLog in time: "
 date
 echo -e -n "\nYour current IP is: "
@@ -415,10 +415,57 @@ append() {
     echo "Lines added successfully..."
 }
 
-save(){
-	echo -e "\nSaving changes..."
-	sleep 2
-	cp hackauto.sh hackauto2.sh
+
+python_code(){
+echo 
+python3 << 'EOF'
+#PYTHON_CODE_HERE
+EOF
+sleep 2
+}
+
+embeded_python() {
+	echo -e -n "\nEnter 'x' to execute python code or Enter 'a' to add python code: "
+	read  choice
+	if [ $choice = "x" ] || [ $choice = "X" ]; then
+		sleep 1
+		python_code
+	elif [ $choice = "a" ] || [ $choice = "A" ]; then
+		mid_code
+		sleep 1
+	else
+		git_error
+	fi
+}
+
+mid_code(){
+    echo ""
+    echo "Enter Python code (end with a line containing only 'EOF' on a new line):"
+    
+    python_code=""
+    while IFS= read -r line; do
+        [ "$line" = "EOF" ] && break
+        python_code="${python_code}${line}"$'\n'
+    done
+    
+    # Use temporary file for awk processing
+    awk -v pycode="$python_code" '
+    {
+        if ($0 == "#PYTHON_CODE_HERE") {
+            printf "%s", pycode
+            print "#PYTHON_CODE_HERE"
+            next
+        }
+        print
+    }' ./hack-auto.sh > ./hack-auto.tmp
+    
+    if [ $? -eq 0 ]; then
+        mv ./hack-auto.tmp ./hack-auto.sh
+        echo -e "\nPython code embedded successfully..."
+    else
+        echo "Error: Failed to process file" >&2
+        rm -f ./hack-auto.tmp
+    fi
 }
 
 custom(){
@@ -731,7 +778,7 @@ master(){
 while true; do
 echo -e "\n\n\nAVAILABLE TOOLS:\n----------------\
 \n1:nslookup		6:netcat\n2:whois			7:theHarvester\n3:nmap			8:sqlmap\n4:gobuster		9:wpscan\n5:air-crack-ng		10:hash-id \
-\n\n11:hydra		16:save\n12:enum4linux		17:edit\n13:nikto		18:append\n14:niktodtvs		19:delete\n15:smbclient		20:custom command \
+\n\n11:hydra		16:embeded python\n12:enum4linux		17:edit\n13:nikto		18:append\n14:niktodtvs		19:delete\n15:smbclient		20:custom command \
 \n\n21:Hacking tool Detector\n22:rerun\n23:close\nm:metasploit"
 echo
 read -p "Select tool to use: " tool
@@ -751,7 +798,7 @@ read -p "Select tool to use: " tool
 		13)nikto;;
 		14)niktodtvs;;
 		15)smbclient;;
-		16)save;;
+		16)embeded_python;;
 		17)redefine_function;;
 		18)append;;
 		19)delete_function;;
